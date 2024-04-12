@@ -1,6 +1,5 @@
-"use client"
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -12,17 +11,16 @@ import hljs from 'highlight.js/lib/core';
 import json from 'highlight.js/lib/languages/javascript';
 hljs.registerLanguage('json', json);
 
-
 export default function Home() {
-  const [format, setFormat] = useState('');
+  const [format, setFormat] = useState<string>('');
   const [fields, setFields] = useState<string[]>([]);
-  const [query, setQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [code, setCode] = useState('');
+  const [query, setQuery] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
+  const [code, setCode] = useState<string>('');
 
-  const saveOptions = ["json", "csv", "xlsx"];
-  const fieldOptions = ["Asin", "Url"];
+  const saveOptions: string[] = ["json", "csv", "xlsx"];
+  const fieldOptions: string[] = ["Asin", "Url"];
 
   const handleSave = async () => {
     try {
@@ -30,41 +28,30 @@ export default function Home() {
 
       const url = `https://server-delta-rouge.vercel.app/amazon/?q=${query}&format=${format}&fields=${fields.join(',')}`;
 
-      // Create a config object for the axios request
-      const config = {
-        url,
-        method: 'GET',
+      const response: AxiosResponse<Blob> = await axios.get(url, {
         responseType: 'blob',
         onDownloadProgress: (progressEvent) => {
           const total = progressEvent.total;
-          if (total > 0) {
+          if (total !== undefined && total > 0) {
             const progress = Math.round((progressEvent.loaded * 100) / total);
             console.log('Progress:', progress); // Check the progress value
             setProgress(progress);
           }
         },
-      };
+      });
 
-      // Make a GET request to the URL
-      const response = await axios(config);
-
-      // Create a URL object from the blob data
       const urlObject = window.URL.createObjectURL(new Blob([response.data]));
 
-      // Create a temporary anchor element
       const link = document.createElement('a');
       link.href = urlObject;
       link.setAttribute('download', `data.${format}`);
 
-      // Append the anchor element to the body and trigger the download
       document.body.appendChild(link);
       link.click();
 
-      // Clean up by removing the anchor element and revoking the URL object
       document.body.removeChild(link);
       window.URL.revokeObjectURL(urlObject);
     } catch (error) {
-      // Handle any errors
       console.error('Error:', error);
     } finally {
       setIsLoading(false);
@@ -72,39 +59,32 @@ export default function Home() {
     }
   };
 
-
- const toggleField = (field) => {
-     if (fields.includes(field)) {
+  const toggleField = (field: string) => {
+    if (fields.includes(field)) {
       setFields(fields.filter((f) => f !== field));
-     } else {
+    } else {
       setFields([...fields, field]);
-     }
-   };
+    }
+  };
 
-
-
-   const toggleSelectAll = () => {
-     if (fields.length === fieldOptions.length) {
-       setFields([]);
-     } else {
-       setFields([...fieldOptions]);
-     }
-   };
+  const toggleSelectAll = () => {
+    if (fields.length === fieldOptions.length) {
+      setFields([]);
+    } else {
+      setFields([...fieldOptions]);
+    }
+  };
 
   const handlePreview = async () => {
     try {
       setIsLoading(true);
 
-      // Construct the URL with the selected format, query, and fields
       const url = `https://server-delta-rouge.vercel.app/amazon/?q=${query}&format=${format}&fields=${fields.join(',')}`;
 
-      // Make a GET request to the URL
       const response = await axios.get(url);
 
-      // Update the code state with the fetched data
       setCode(JSON.stringify(response.data, null, 2));
     } catch (error) {
-      // Handle any errors
       console.error('Error:', error);
     } finally {
       setIsLoading(false);
@@ -136,7 +116,7 @@ export default function Home() {
           </SelectContent>
         </Select>
 
-         <Popover >
+        <Popover >
           <PopoverTrigger asChild>
             <Button variant="outline">Select fields</Button>
           </PopoverTrigger>
@@ -160,7 +140,7 @@ export default function Home() {
               ))
             }
           </PopoverContent>
-        </Popover> 
+        </Popover>
         <Button onClick={handleSave}>Download</Button>
         <Button onClick={handlePreview}>Preview</Button>
         {isLoading && (

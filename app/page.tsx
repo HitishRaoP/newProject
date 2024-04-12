@@ -10,13 +10,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 import hljs from 'highlight.js/lib/core';
 import json from 'highlight.js/lib/languages/javascript';
-import FieldOptions from '@/components/fieldOptions';
 hljs.registerLanguage('json', json);
 
 
 export default function Home() {
   const [format, setFormat] = useState('');
-  const [fields, setFields] = useState([]);
+  const [fields, setFields] = useState<string[]>([]);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -74,23 +73,23 @@ export default function Home() {
   };
 
 
-  // const toggleField = (field) => {
-  //   if (fields.includes(field)) {
-  //     setFields(fields.filter((f) => f !== field));
-  //   } else {
-  //     setFields([...fields, field]);
-  //   }
-  // };
+ const toggleField = (field) => {
+     if (fields.includes(field)) {
+      setFields(fields.filter((f) => f !== field));
+     } else {
+      setFields([...fields, field]);
+     }
+   };
 
 
 
-  // const toggleSelectAll = () => {
-  //   if (fields.length === fieldOptions.length) {
-  //     setFields([]);
-  //   } else {
-  //     setFields([...fieldOptions]);
-  //   }
-  // };
+   const toggleSelectAll = () => {
+     if (fields.length === fieldOptions.length) {
+       setFields([]);
+     } else {
+       setFields([...fieldOptions]);
+     }
+   };
 
   const handlePreview = async () => {
     try {
@@ -137,7 +136,7 @@ export default function Home() {
           </SelectContent>
         </Select>
 
-        {/* <Popover >
+         <Popover >
           <PopoverTrigger asChild>
             <Button variant="outline">Select fields</Button>
           </PopoverTrigger>
@@ -161,8 +160,7 @@ export default function Home() {
               ))
             }
           </PopoverContent>
-        </Popover> */}
-        <FieldOptions />
+        </Popover> 
         <Button onClick={handleSave}>Download</Button>
         <Button onClick={handlePreview}>Preview</Button>
         {isLoading && (

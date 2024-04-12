@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { Input } from '@/components/ui/input';
